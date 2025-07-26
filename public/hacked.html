@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Password Cracked!</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    background: #001f3f;
+    color: white;
+    padding: 40px;
+    max-width: 700px;
+    margin: auto;
+  }
+  h1 {
+    color: #ff4136;
+  }
+.password {
+  font-family: monospace;
+  font-size: 28px;
+  background: #007bff;
+  padding: 5px 10px;
+  border-radius: 8px;
+  display: inline-block;
+  margin-left: 10px;
+}
+
+  .tips {
+    background: #003366;
+    padding: 20px;
+    border-radius: 8px;
+    line-height: 1.6;
+  }
+  ul {
+    margin-top: 10px;
+  }
+</style>
+</head>
+<body>
+
+<h1>⚠️ Password Cracked!</h1>
+<p><strong>Your password is :</strong> <span class="password" id="passwordDisplay"></span></p>
+
+<div class="tips">
+  <h2>How to protect your account?</h2>
+  <ul>
+    <li>Use <strong>long and complex</strong> passwords (mix uppercase, lowercase, numbers, symbols).</li>
+    <li>Never use common or easily guessable passwords like <code>123456</code>, <code>password</code>, or your name.</li>
+    <li>Use a reputable password manager to generate and store secure passwords.</li>
+    <li>Enable 2-Factor Authentication (2FA) wherever possible.</li>
+    <li>Monitor your accounts for suspicious login activity.</li>
+  </ul>
+
+  <h3>How long do passwords take to crack?</h3>
+  <ul>
+    <li><code>123456</code> or <code>password</code> — seconds to minutes by brute force.</li>
+    <li>Simple passwords with letters and numbers — minutes to hours.</li>
+    <li>Long, complex passwords (12+ chars with symbols) — thousands of years on modern hardware.</li>
+  </ul>
+</div>
+
+<script>
+  const password = localStorage.getItem("hackedPassword") || "(unknown)";
+  document.getElementById("passwordDisplay").innerText = password;
+
+  // Optional: Clear localStorage after showing
+  // localStorage.removeItem("hackedPassword");
+</script>
+
+</body>
+</html>
